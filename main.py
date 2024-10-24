@@ -1,6 +1,7 @@
 import pygame
+import os
 
-# Initialize Pygame
+
 pygame.init()
 
 # Constants
@@ -14,9 +15,7 @@ BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
 GRAY = (100, 100, 100)
 
-# Set up the display
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Sokoban Game")
+
 
 class Button:
     def __init__(self, x, y, width, height, text, action=None):
@@ -39,14 +38,19 @@ class SokobanGame:
     def __init__(self):
         self.state = "welcome"
         self.level = None
+        self.background = pygame.image.load('asset/Aries.png')
+        self.button_start = pygame.image.load('asset/start_btn.png')
+        self.button_start_rect = self.button_start.get_rect()
+        self.button_start_rect.topleft = (320, 330) 
+         # Load and play background music
+        pygame.mixer.music.load('asset/music.mp3')  # Replace with your music file path
+        pygame.mixer.music.play(-1)  # -1 makes the music loop indefinitely
+
 
     def welcome_screen(self):
-        screen.fill(WHITE)
-        title_font = pygame.font.SysFont(None, 72)
-        title_text = title_font.render("Sokoban Game", True, BLACK)
-        screen.blit(title_text, ((SCREEN_WIDTH - title_text.get_width()) // 2, 100))
+        screen.blit(self.background, (0, 0)) # Draw background image
+        screen.blit(self.button_start, self.button_start_rect.topleft)
 
-        start_button.draw(screen)
 
     def level_selection_screen(self):
         screen.fill(WHITE)
@@ -80,7 +84,7 @@ class SokobanGame:
 
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if self.state == "welcome":
-                        if start_button.is_clicked(event.pos):
+                        if  self.button_start_rect.collidepoint(event.pos):
                             self.state = "level_selection"
                     elif self.state == "level_selection":
                         for idx, button in enumerate(level_buttons):
@@ -97,15 +101,22 @@ class SokobanGame:
 
             pygame.display.update()
 
-# Create buttons
-start_button = Button((SCREEN_WIDTH - BUTTON_WIDTH) // 2, 400, BUTTON_WIDTH, BUTTON_HEIGHT, "Start Game")
+def main():
+    global screen,level_buttons
+    pygame.mixer.init()
+    
+    pygame.init()
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    pygame.display.set_caption("Sokoban Game")
+    # Assuming you have 3 levels for demonstration
+    level_buttons = [Button(100, 200 + i * 70, BUTTON_WIDTH, BUTTON_HEIGHT, f"Level {i+1}") for i in range(3)]
 
-# Assuming you have 3 levels for demonstration
-level_buttons = [Button(100, 200 + i * 70, BUTTON_WIDTH, BUTTON_HEIGHT, f"Level {i+1}") for i in range(3)]
+    # Game instance
+    game = SokobanGame()
+    game.run()
 
-# Game instance
-game = SokobanGame()
-game.run()
+if __name__ == "__main__":
+    main()
 
-# Quit Pygame
 pygame.quit()
+pygame.mixer.music.stop()  

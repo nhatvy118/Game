@@ -4,7 +4,7 @@ import os
 pygame.init()
 
 # Constants
-SCREEN_WIDTH, SCREEN_HEIGHT = 1122, 700
+SCREEN_WIDTH, SCREEN_HEIGHT = 1122, 727
 BUTTON_WIDTH, BUTTON_HEIGHT = 200, 50
 FONT_SIZE = 32
 
@@ -13,6 +13,8 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
 GRAY = (100, 100, 100)
+TILE_SIZE = 60
+tile_images = {}
 
 
 class Button:
@@ -31,7 +33,6 @@ class Button:
 
     def is_clicked(self, pos):
         return self.rect.collidepoint(pos)
-
 
 class SokobanGame:
     def __init__(self):
@@ -80,7 +81,7 @@ class SokobanGame:
         self.levelBtnRects[9].topleft = (435.82, 531.12)
         self.levelBtnRects[10].topleft = (599.59, 531.12)
         self.levelBtnRects[11].topleft = (764.79, 531.12)
-
+        self.map_processing()
         
     def welcome_screen(self):
         self.screen.blit(self.background, (0, 0))  # Draw background first
@@ -99,21 +100,57 @@ class SokobanGame:
         self.screen.blit(self.table, (227, 200))  
         for i, button in enumerate(self.algoBtn):
             self.screen.blit(button, self.algoBtnRects[i].topleft)
-        
-
 
     def load_level(self, level_file):
         with open(level_file, 'r') as f:
             self.level = f.readlines()  # Load map into a list of strings
 
-    def play_game(self):
-        self.screen.fill(WHITE)
+    def map_processing(self):
+        ASSET_PATH = 'asset/' 
+        global tile_images
+        tile_images = {
+            "#": pygame.image.load(os.path.join(ASSET_PATH, "wall.png")),
+            " ": pygame.image.load(os.path.join(ASSET_PATH, "ground.png")),
+            "$": pygame.image.load(os.path.join(ASSET_PATH, "stone.png")),
+            #"@": pygame.image.load(os.path.join(ASSET_PATH, "ares.png")),
+            ".": pygame.image.load(os.path.join(ASSET_PATH, "switch_place.png")),
+            "*": pygame.image.load(os.path.join(ASSET_PATH, "stone_switch_place.png")),
+            #"+": pygame.image.load(os.path.join(ASSET_PATH, "ares_on_switch.png")),
+        }
+
+        for key, image in tile_images.items():
+            tile_images[key] = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
+
+    def draw_map(self):
         if self.level:
-            for y, row in enumerate(self.level):
-                for x, char in enumerate(row.strip()):
-                    # Draw map (for now just using text representation)
-                    text = pygame.font.SysFont(None, 32).render(char, True, BLACK)
-                    self.screen.blit(text, (x * 32, y * 32))
+            max_width = max(len(row) for row in self.level[1:])  # Get the length of the longest row
+            map_width = max_width * TILE_SIZE 
+            map_height = (len(self.level) - 1) * TILE_SIZE  # Height in pixels
+
+            # Calculate offsets to center the map
+            offset_x = (SCREEN_WIDTH - map_width) // 2 
+            offset_y = (SCREEN_HEIGHT - map_height) // 2
+
+            for y in range(1, len(self.level)):  # Start from the second line
+                row = self.level[y]  # Use the original row string
+                inside_walls = False  # Reset the flag for each new row
+                for x in range(len(row)):
+                    char = row[x]
+                    if char == "#":
+                        inside_walls = True  
+
+                    if inside_walls:
+                        if char not in ("#", " ") and x < len(row)-1:  # If it's not a wall or empty space
+                            self.screen.blit(tile_images[" "], (offset_x + (x * TILE_SIZE), offset_y + (y * TILE_SIZE)))
+                        if char in tile_images:
+                            self.screen.blit(tile_images[char], (offset_x + (x * TILE_SIZE), offset_y + (y * TILE_SIZE)))
+
+            
+
+
+    def play_game(self):
+        self.screen.blit(self.background, (0, 0))
+        self.draw_map()
 
     def run(self):
         running = True

@@ -16,6 +16,53 @@ GRAY = (100, 100, 100)
 TILE_SIZE = 60
 tile_images = {}
 
+class Stone:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.image = pygame.image.load('asset/stone.png')
+        self.image = pygame.image.load('asset/stone.png')
+        self.image = pygame.transform.scale(self.image, (TILE_SIZE, TILE_SIZE)) 
+        self.rect = self.image.get_rect(topleft=(self.x, self.y))
+
+    def move(self, dx, dy):
+        self.x += dx
+        self.y += dy
+        self.rect.topleft = (self.x, self.y)
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
+class Player:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.image = pygame.image.load('asset/player.png') 
+        self.image = pygame.transform.scale(self.image, (TILE_SIZE, TILE_SIZE))  # Scale to TILE_SIZE
+        self.rect = self.image.get_rect(topleft=(self.x, self.y))
+
+    def move(self, dx, dy, stones):
+        print('move')
+        # Calculate potential new position
+        new_x = self.x + dx
+        new_y = self.y + dy
+        collided_with_stone = False
+
+        # Check collision with stone
+        for stone in stones:
+            if self.rect.move(dx, dy).colliderect(stone.rect):  # Predict rect position
+                stone.move(dx, dy)
+                collided_with_stone = True
+                break
+
+        # Update player position
+        if not collided_with_stone:
+            self.x, self.y = new_x, new_y  # Update coordinates only if no collision
+        self.rect.topleft = (self.x, self.y)  # Update rect position
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
 
 class SokobanGame:
     def __init__(self):
@@ -25,6 +72,8 @@ class SokobanGame:
         self.algoType = None
         self.state = "welcome"
         self.level = None
+        self.player = None  # Placeholder for Player
+        self.stones = []  # Placeholder for Stone
         self.title = pygame.image.load('asset/Aries.png')
         self.background = pygame.image.load('asset/background.png')
         self.background = pygame.transform.scale(self.background, (SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -80,6 +129,7 @@ class SokobanGame:
         self.screen.blit(self.titleTableLevel, (229, 57))
         for i, button in enumerate(self.levelBtn):
             self.screen.blit(button, self.levelBtnRects[i].topleft)
+
     def algo_selection_screen(self):
         self.screen.blit(self.background, (0, 0))  
         self.screen.blit(self.titleTableAlgo, (229, 57))  
@@ -97,7 +147,7 @@ class SokobanGame:
         tile_images = {
             "#": pygame.image.load(os.path.join(ASSET_PATH, "wall.png")),
             " ": pygame.image.load(os.path.join(ASSET_PATH, "ground.png")),
-            "$": pygame.image.load(os.path.join(ASSET_PATH, "stone.png")),
+            # "$": pygame.image.load(os.path.join(ASSET_PATH, "stone.png")),
             #"@": pygame.image.load(os.path.join(ASSET_PATH, "ares.png")),
             ".": pygame.image.load(os.path.join(ASSET_PATH, "switch_place.png")),
             "*": pygame.image.load(os.path.join(ASSET_PATH, "stone_switch_place.png")),
@@ -107,16 +157,8 @@ class SokobanGame:
         for key, image in tile_images.items():
             tile_images[key] = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
 
-    def draw_map(self):
+    def draw_map(self, offset_x, offset_y):
         if self.level:
-            max_width = max(len(row) for row in self.level[1:])  # Get the length of the longest row
-            map_width = max_width * TILE_SIZE 
-            map_height = (len(self.level) - 1) * TILE_SIZE  # Height in pixels
-
-            # Calculate offsets to center the map
-            offset_x = (SCREEN_WIDTH - map_width) // 2 
-            offset_y = (SCREEN_HEIGHT - map_height) // 2
-
             for y in range(1, len(self.level)):  # Start from the second line
                 row = self.level[y]  # Use the original row string
                 inside_walls = False  # Reset the flag for each new row
@@ -127,12 +169,56 @@ class SokobanGame:
 
                     if inside_walls:
                         if char not in ("#", " ") and x < len(row)-1:  # If it's not a wall or empty space
-                            self.screen.blit(tile_images[" "], (offset_x + (x * TILE_SIZE), offset_y + (y * TILE_SIZE)))
-                        if char in tile_images:
-                            self.screen.blit(tile_images[char], (offset_x + (x * TILE_SIZE), offset_y + (y * TILE_SIZE)))
-
+                            self.screen.blit(tile_images[" "], (offset_x + (x * TILE_SIZE), offset_y + ((y-1) * TILE_SIZE)))
+                        if char in tile_images and char not in ['@', '$']:
+                            self.screen.blit(tile_images[char], (offset_x + (x * TILE_SIZE), offset_y + ((y-1) * TILE_SIZE)))
+                        if char == "@":  
+                            self.player.x, self.player.y = offset_x + x * TILE_SIZE, offset_y + (y - 1) * TILE_SIZE
+                            self.player.rect.topleft = (self.player.x, self.player.y)  # Update rect position
+                        if char == "$": 
+                            self.stones.append(Stone(offset_x + x * TILE_SIZE,  offset_y + (y-1) * TILE_SIZE))
             
+            if self.player:
+                self.player.draw(self.screen)
+            for stone in self.stones:
+                stone.draw(self.screen)
 
+    def draw_map(self):
+        if self.level:
+            max_width = max(len(row) for row in self.level[1:]) - 1  # Ignore \n
+            map_width = max_width * TILE_SIZE 
+            map_height = (len(self.level) - 1) * TILE_SIZE  
+            offset_x = (SCREEN_WIDTH - map_width) // 2 
+            offset_y = (SCREEN_HEIGHT - map_height) // 2
+
+            self.stones = []  # Clear previous stones each time
+            self.player = None  # Reset player
+
+            for y in range(1, len(self.level)):  # Start from the second line
+                row = self.level[y]  # Use the original row string
+                for x in range(len(row)):
+                    char = row[x]
+                    inside_walls = False  
+                    if char == "#":
+                        inside_walls = True  
+
+                    if inside_walls:
+                        if char not in ("#") and x < len(row)-1:
+                            self.screen.blit(tile_images[" "], (offset_x + (x * TILE_SIZE), offset_y + ((y-1) * TILE_SIZE)))
+                        if char in tile_images and char not in ['@', '$']:
+                            self.screen.blit(tile_images[char], (offset_x + (x * TILE_SIZE), offset_y + ((y-1) * TILE_SIZE)))
+                        elif char == "@":  # Player
+                            self.player = Player(offset_x + (x * TILE_SIZE), offset_y + ((y-1) * TILE_SIZE))  # Create the player instance
+                            self.player.rect.topleft = (offset_x + (x * TILE_SIZE), offset_y + ((y-1) * TILE_SIZE))  # Update rect position
+                            self.player.draw(self.screen)  # Draw the player immediately
+                        elif char == "$":  # Stone
+                            stone = Stone(offset_x + (x * TILE_SIZE), offset_y + ((y-1) * TILE_SIZE))  # Create a stone instance
+                            self.stones.append(stone)  # Add stone to the list
+                            stone.draw(self.screen)  # Draw the stone immediately
+
+            # No need to draw player or stones again, they're drawn in the loop above
+
+    
 
     def play_game(self):
         self.screen.blit(self.background, (0, 0))
@@ -160,6 +246,9 @@ class SokobanGame:
         self.screen.blit(score_text, (score_x, score_y))
         self.screen.blit(level_text, (level_x, level_y))
         self.screen.blit(algo_text, (algo_x, algo_y))
+
+        pygame.display.update()  # Update the display after drawing
+
 
 
     def run(self):
@@ -197,7 +286,21 @@ class SokobanGame:
             elif self.state == "play_game":
                 self.play_game()
 
-            pygame.display.update()
+            # Player movement with arrow keys (only in "play_game" state)
+            if self.state == "play_game":
+                keys = pygame.key.get_pressed()
+                if keys[pygame.K_LEFT]:
+                    self.player.move(-TILE_SIZE, 0, self.stones)
+                elif keys[pygame.K_RIGHT]:
+                    self.player.move(TILE_SIZE, 0, self.stones)
+                elif keys[pygame.K_UP]:
+                    self.player.move(0, -TILE_SIZE, self.stones)
+                elif keys[pygame.K_DOWN]:
+                    self.player.move(0, TILE_SIZE, self.stones)
+
+    pygame.display.update()
+
+    
 
 def main():
     # Game instance

@@ -17,9 +17,10 @@ TILE_SIZE = 60
 tile_images = {}
 
 class Stone:
-    def __init__(self, x, y):
+    def __init__(self, x, y, value):
         self.x = x
         self.y = y
+        self.value = value
         self.image = pygame.image.load('asset/stone.png')
         self.image = pygame.image.load('asset/stone.png')
         self.image = pygame.transform.scale(self.image, (TILE_SIZE, TILE_SIZE)) 
@@ -63,7 +64,6 @@ class Player:
     def draw(self, screen):
         screen.blit(self.image, self.rect)
 
-
 class SokobanGame:
     def __init__(self):
         pygame.init()  # Initialize Pygame
@@ -85,6 +85,9 @@ class SokobanGame:
         self.button_start_rect.topleft = (458, 461)
         self.algoBtn = []
         self.algoBtnRects = []
+        self.current_score = pygame.image.load('asset/Score.png')
+        self.current_level = pygame.image.load('asset/Level.png')
+        self.current_algo = pygame.image.load('asset/Algo.png')
         for i in range(1, 5):
             button_image = pygame.image.load(f'asset/algo{i}.png')
             self.algoBtn.append(button_image)
@@ -114,9 +117,6 @@ class SokobanGame:
         self.levelBtnRects[10].topleft = (599.59, 531.12)
         self.levelBtnRects[11].topleft = (764.79, 531.12)
         self.map_processing()
-        self.current_score = pygame.image.load('asset/Score.png')
-        self.current_level = pygame.image.load('asset/Level.png')
-        self.current_algo = pygame.image.load('asset/Algo.png')
         
     def welcome_screen(self):
         self.screen.blit(self.background, (0, 0))  # Draw background first
@@ -139,7 +139,8 @@ class SokobanGame:
 
     def load_level(self, level_file):
         with open(level_file, 'r') as f:
-            self.level = f.readlines()  # Load map into a list of strings
+            self.level = f.readlines()  
+        self.render_map()
 
     def map_processing(self):
         ASSET_PATH = 'asset/' 
@@ -157,45 +158,19 @@ class SokobanGame:
         for key, image in tile_images.items():
             tile_images[key] = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
 
-    def draw_map(self, offset_x, offset_y):
-        if self.level:
-            for y in range(1, len(self.level)):  # Start from the second line
-                row = self.level[y]  # Use the original row string
-                inside_walls = False  # Reset the flag for each new row
-                for x in range(len(row)):
-                    char = row[x]
-                    if char == "#":
-                        inside_walls = True  
-
-                    if inside_walls:
-                        if char not in ("#", " ") and x < len(row)-1:  # If it's not a wall or empty space
-                            self.screen.blit(tile_images[" "], (offset_x + (x * TILE_SIZE), offset_y + ((y-1) * TILE_SIZE)))
-                        if char in tile_images and char not in ['@', '$']:
-                            self.screen.blit(tile_images[char], (offset_x + (x * TILE_SIZE), offset_y + ((y-1) * TILE_SIZE)))
-                        if char == "@":  
-                            self.player.x, self.player.y = offset_x + x * TILE_SIZE, offset_y + (y - 1) * TILE_SIZE
-                            self.player.rect.topleft = (self.player.x, self.player.y)  # Update rect position
-                        if char == "$": 
-                            self.stones.append(Stone(offset_x + x * TILE_SIZE,  offset_y + (y-1) * TILE_SIZE))
-            
-            if self.player:
-                self.player.draw(self.screen)
-            for stone in self.stones:
-                stone.draw(self.screen)
-
-    def draw_map(self):
+    def render_map(self):
+        self.screen.blit(self.background, (0, 0))
         if self.level:
             max_width = max(len(row) for row in self.level[1:]) - 1  # Ignore \n
             map_width = max_width * TILE_SIZE 
             map_height = (len(self.level) - 1) * TILE_SIZE  
             offset_x = (SCREEN_WIDTH - map_width) // 2 
             offset_y = (SCREEN_HEIGHT - map_height) // 2
-
-            self.stones = []  # Clear previous stones each time
-            self.player = None  # Reset player
+            self.player = None
+            self.stones = []
 
             for y in range(1, len(self.level)):  # Start from the second line
-                row = self.level[y]  # Use the original row string
+                row = self.level[y] 
                 for x in range(len(row)):
                     char = row[x]
                     inside_walls = False  
@@ -216,14 +191,7 @@ class SokobanGame:
                             self.stones.append(stone)  # Add stone to the list
                             stone.draw(self.screen)  # Draw the stone immediately
 
-            # No need to draw player or stones again, they're drawn in the loop above
-
-    
-
     def play_game(self):
-        self.screen.blit(self.background, (0, 0))
-        self.draw_map()
-    
         custom_font = pygame.font.Font("font/IrishGrover-Regular.ttf", 36)  # Replace with the actual path and desired size
 
         # Render text for labels
@@ -246,9 +214,7 @@ class SokobanGame:
         self.screen.blit(score_text, (score_x, score_y))
         self.screen.blit(level_text, (level_x, level_y))
         self.screen.blit(algo_text, (algo_x, algo_y))
-
-        pygame.display.update()  # Update the display after drawing
-
+        pygame.display.update()
 
 
     def run(self):
@@ -298,7 +264,7 @@ class SokobanGame:
                 elif keys[pygame.K_DOWN]:
                     self.player.move(0, TILE_SIZE, self.stones)
 
-    pygame.display.update()
+            pygame.display.update()
 
     
 

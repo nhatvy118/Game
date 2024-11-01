@@ -21,22 +21,44 @@ class Stone:
         self.x = x
         self.y = y
         self.value = value
-        self.image = pygame.image.load('asset/stone.png')
-        self.image = pygame.transform.scale(self.image, (TILE_SIZE, TILE_SIZE)) 
+        self.original_image = pygame.image.load('asset/stone.png')
+        self.image_on_switch = pygame.image.load('asset/stone_on_switch.png')
+        self.image = self.original_image
+        self.image = pygame.transform.scale(self.original_image, (TILE_SIZE, TILE_SIZE)) 
         self.rect = self.image.get_rect(topleft=(self.x, self.y))
+        self.on_switch = False  # Track if stone is on a switch
 
-    def move(self, dx, dy, walls):
-        # Calculate potential new position
+    def move(self, dx, dy, walls, stones, switches):
+        original_x = self.x
+        original_y = self.y
         new_x = self.x + dx
         new_y = self.y + dy
-        self.x += dx
-        self.y += dy
-        new_position = (new_x, new_y)
 
-        # Check if new position is a wall
-        if new_position in walls:
-            return 
+        # Check for collisions with walls
+        if (new_x, new_y) in walls:
+            return  # Prevent movement if colliding with a wall
+
+        # Check for collisions with other stones
+        for stone in stones:
+            if stone != self and stone.rect.topleft == (new_x, new_y):
+                return  
+            
+        # Update position if no collision
+        self.x = new_x
+        self.y = new_y
         self.rect.topleft = (self.x, self.y)
+
+        # Check if stone is on a switch
+        if (self.x, self.y) in switches:
+            if not self.on_switch:  # Resize only once when first moving onto the switch
+                self.image = self.image_on_switch  # Change to alternate image
+                self.image = pygame.transform.scale(self.image, (TILE_SIZE, TILE_SIZE))
+                self.on_switch = True
+        else:
+            if self.on_switch:
+                self.image = self.original_image  # Revert to normal image
+                self.image = pygame.transform.scale(self.image, (TILE_SIZE, TILE_SIZE))
+                self.on_switch = False
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
@@ -45,36 +67,57 @@ class Player:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.image = pygame.image.load('asset/player.png') 
-        self.image = pygame.transform.scale(self.image, (TILE_SIZE, TILE_SIZE))  # Scale to TILE_SIZE
+        self.image_normal = pygame.image.load('asset/player.png')
+        self.image_switch = pygame.image.load('asset/player_on_switch.png')
+        self.image = self.image_normal
+        self.image = pygame.transform.scale(self.image, (TILE_SIZE, TILE_SIZE))
         self.rect = self.image.get_rect(topleft=(self.x, self.y))
 
-    def move(self, dx, dy, stones, walls):
-        # Calculate potential new position
+    def move(self, dx, dy, stones, walls, switches):
+        # Calculate potential new position for the player
         new_x = self.x + dx
         new_y = self.y + dy
-        collided_with_stone = False
         new_position = (new_x, new_y)
 
-        # Check if new position is a wall
+        # Check if the player is trying to move into a wall
         if new_position in walls:
-            return 
+            return  # Stop movement if blocked by a wall
 
-        # Check collision with stone
+        collided_with_stone = False
+
+        # Check if the player is colliding with any stone
         for stone in stones:
-            if self.rect.move(dx, dy).colliderect(stone.rect):  # Predict rect position
-                stone.move(dx, dy, walls)
-                self.x, self.y = new_x, new_y  # Update coordinates
+            if self.rect.move(dx, dy).colliderect(stone.rect):
+                # Calculate potential new position for the stone
+                stone_new_x = stone.x + dx
+                stone_new_y = stone.y + dy
+                stone_new_position = (stone_new_x, stone_new_y)
+
+                # Check if the stone's new position is blocked by a wall or another stone
+                if stone_new_position in walls or any(s.rect.topleft == stone_new_position for s in stones if s != stone):
+                    return  # Stop movement if stone is blocked
+
+                # Move the stone if not blocked
+                stone.move(dx, dy, walls, stones, switches)
                 collided_with_stone = True
                 break
 
-        # Update player position
-        if not collided_with_stone:
-            self.x, self.y = new_x, new_y  # Update coordinates only if no collision
-        self.rect.topleft = (self.x, self.y)  # Update rect position
+        # Update player position if not blocked by a wall or a non-movable stone
+        if not collided_with_stone or (collided_with_stone and not stone_new_position in walls):
+            self.x, self.y = new_x, new_y
+            self.rect.topleft = (self.x, self.y)
+        
+        # Check if the player is on a switch
+        if (self.x, self.y) in switches:
+            self.image = self.image_switch  # Change to alternate image
+            self.image = pygame.transform.scale(self.image, (TILE_SIZE, TILE_SIZE))
+        else:
+            self.image = self.image_normal  # Revert to normal image
+            self.image = pygame.transform.scale(self.image, (TILE_SIZE, TILE_SIZE))
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
+
 
 class SokobanGame:
     def __init__(self):
@@ -136,6 +179,7 @@ class SokobanGame:
         self.move_delay = 50  # delay in milliseconds between moves
         self.last_move_time = pygame.time.get_ticks()  # last time player moved
         self.walls = []
+        self.switches = []
         
     def welcome_screen(self):
         self.screen.blit(self.background, (0, 0))  # Draw background first
@@ -208,6 +252,8 @@ class SokobanGame:
                         if char == "$":
                             self.stones.append(Stone(offset_x + (x * TILE_SIZE), offset_y + ((y-1) * TILE_SIZE), stones_value[cnt_stone]))
                             cnt_stone
+                        if char == '.':
+                            self.switches.append((offset_x + (x * TILE_SIZE), offset_y + ((y-1) * TILE_SIZE)))
 
     def render_map(self):
         self.screen.blit(self.background, (0, 0))
@@ -221,7 +267,6 @@ class SokobanGame:
             for y in range(1, len(self.level)):  # Start from the second line
                 row = self.level[y] 
                 inside_walls = False  
-                print(row)
                 for x in range(len(row)):
                     char = row[x]
                     if char == "#":
@@ -271,13 +316,13 @@ class SokobanGame:
                 elif event.type == pygame.KEYDOWN:
                     if self.state == "play_game":
                         if event.key == pygame.K_LEFT:
-                            self.player.move(-TILE_SIZE, 0, self.stones, self.walls)
+                            self.player.move(-TILE_SIZE, 0, self.stones, self.walls, self.switches)
                         elif event.key == pygame.K_RIGHT:
-                            self.player.move(TILE_SIZE, 0, self.stones, self.walls)
+                            self.player.move(TILE_SIZE, 0, self.stones, self.walls, self.switches)
                         elif event.key == pygame.K_UP:
-                            self.player.move(0, -TILE_SIZE, self.stones, self.walls)
+                            self.player.move(0, -TILE_SIZE, self.stones, self.walls, self.switches)
                         elif event.key == pygame.K_DOWN:
-                            self.player.move(0, TILE_SIZE, self.stones, self.walls)
+                            self.player.move(0, TILE_SIZE, self.stones, self.walls, self.switches)
 
                  # Check for mouse button events
                 if event.type == pygame.MOUSEBUTTONDOWN:

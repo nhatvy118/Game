@@ -17,23 +17,6 @@ TILE_SIZE = 60
 tile_images = {}
 
 
-class Button:
-    def __init__(self, x, y, width, height, text, action=None):
-        self.rect = pygame.Rect(x, y, width, height)
-        self.text = text
-        self.action = action
-        self.font = pygame.font.SysFont(None, FONT_SIZE)
-        self.color = GRAY
-
-    def draw(self, screen):
-        pygame.draw.rect(screen, self.color, self.rect)
-        text_surface = self.font.render(self.text, True, WHITE)
-        screen.blit(text_surface, (self.rect.x + (self.rect.width - text_surface.get_width()) // 2,
-                                    self.rect.y + (self.rect.height - text_surface.get_height()) // 2))
-
-    def is_clicked(self, pos):
-        return self.rect.collidepoint(pos)
-
 class SokobanGame:
     def __init__(self):
         pygame.init()  # Initialize Pygame
@@ -82,6 +65,9 @@ class SokobanGame:
         self.levelBtnRects[10].topleft = (599.59, 531.12)
         self.levelBtnRects[11].topleft = (764.79, 531.12)
         self.map_processing()
+        self.current_score = pygame.image.load('asset/Score.png')
+        self.current_level = pygame.image.load('asset/Level.png')
+        self.current_algo = pygame.image.load('asset/Algo.png')
         
     def welcome_screen(self):
         self.screen.blit(self.background, (0, 0))  # Draw background first
@@ -151,6 +137,30 @@ class SokobanGame:
     def play_game(self):
         self.screen.blit(self.background, (0, 0))
         self.draw_map()
+    
+        custom_font = pygame.font.Font("font/IrishGrover-Regular.ttf", 36)  # Replace with the actual path and desired size
+
+        # Render text for labels
+        score_text = custom_font.render("100", True, (255, 255, 255)) 
+        level_text = custom_font.render("200", True, (255, 255, 255))
+        algo_text = custom_font.render("BFS", True, (255, 255, 255))
+        score_x = 17 + (self.current_score.get_width() - score_text.get_width()) // 2
+        score_y = 19 + (self.current_score.get_height() - score_text.get_height()) // 2
+
+        level_x = 222 + (self.current_level.get_width() - level_text.get_width()) // 2
+        level_y = 19 + (self.current_level.get_height() - level_text.get_height()) // 2
+
+        algo_x = 372 + (self.current_algo.get_width() - algo_text.get_width()) // 2
+        algo_y = 19 + (self.current_algo.get_height() - algo_text.get_height()) // 2
+
+
+        self.screen.blit(self.current_score, (17, 19))
+        self.screen.blit(self.current_level, (222, 19))
+        self.screen.blit(self.current_algo, (372, 19))
+        self.screen.blit(score_text, (score_x, score_y))
+        self.screen.blit(level_text, (level_x, level_y))
+        self.screen.blit(algo_text, (algo_x, algo_y))
+
 
     def run(self):
         running = True

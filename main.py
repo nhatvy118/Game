@@ -17,20 +17,23 @@ TILE_SIZE = 60
 tile_images = {}
 
 class Stone:
-    def __init__(self, x, y, value):
+    def __init__(self, x, y, value, on_switch):
         self.x = x
         self.y = y
         self.value = value
         self.original_image = pygame.image.load('asset/stone.png')
         self.image_on_switch = pygame.image.load('asset/stone_on_switch.png')
+        self.on_switch = on_switch # Track if stone is on a switch
         self.image = self.original_image
-        self.image = pygame.transform.scale(self.original_image, (TILE_SIZE, TILE_SIZE)) 
+        # Check if stone is on a switch
+        if self.on_switch:  # Resize only once when first moving onto the switch
+            self.image = self.image_on_switch  # Change to alternate image
+        else:
+            self.image = self.original_image  # Revert to normal image
+        self.image = pygame.transform.scale(self.image, (TILE_SIZE, TILE_SIZE))
         self.rect = self.image.get_rect(topleft=(self.x, self.y))
-        self.on_switch = False  # Track if stone is on a switch
 
     def move(self, dx, dy, walls, stones, switches):
-        original_x = self.x
-        original_y = self.y
         new_x = self.x + dx
         new_y = self.y + dy
 
@@ -67,8 +70,30 @@ class Player:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.image_normal = pygame.image.load('asset/player.png')
-        self.image_switch = pygame.image.load('asset/player_on_switch.png')
+        self.direction = "right"
+        self.on_switch = False  # Track if player is on a switch
+        self.frame_index = 0
+
+        # Load sprites
+        self.image_normal = pygame.image.load('asset/player_standing.png')  # Standing image
+
+        # Load movement sprites (2 frames for right, flip for left)
+        self.right_move_frames = [
+            pygame.image.load('asset/player_move_right_1.png'),
+            pygame.image.load('asset/player_move_right_2.png')
+        ]
+        self.left_move_frames = [pygame.transform.flip(frame, True, False) for frame in self.right_move_frames]
+
+        self.up_move_frames = [
+            pygame.image.load('asset/player_up_1.png'),
+            pygame.image.load('asset/player_up_2.png')
+        ]
+        self.down_move_frames = [
+            pygame.image.load('asset/player_down_1.png'),
+            pygame.image.load('asset/player_down_2.png')
+        ]
+
+        # Initial settings
         self.image = self.image_normal
         self.image = pygame.transform.scale(self.image, (TILE_SIZE, TILE_SIZE))
         self.rect = self.image.get_rect(topleft=(self.x, self.y))
@@ -103,21 +128,35 @@ class Player:
                 break
 
         # Update player position if not blocked by a wall or a non-movable stone
-        if not collided_with_stone or (collided_with_stone and not stone_new_position in walls):
+        if not collided_with_stone or (collided_with_stone and new_position not in walls):
             self.x, self.y = new_x, new_y
             self.rect.topleft = (self.x, self.y)
-        
-        # Check if the player is on a switch
-        if (self.x, self.y) in switches:
-            self.image = self.image_switch  # Change to alternate image
-            self.image = pygame.transform.scale(self.image, (TILE_SIZE, TILE_SIZE))
-        else:
-            self.image = self.image_normal  # Revert to normal image
-            self.image = pygame.transform.scale(self.image, (TILE_SIZE, TILE_SIZE))
+
+            # Determine direction and update frames for animation
+            if dx > 0:  # Moving right
+                self.direction = "right"
+                self.update_animation(self.right_move_frames)
+            elif dx < 0:  # Moving left
+                self.direction = "left"
+                self.update_animation(self.left_move_frames)
+            elif dy > 0:  # Moving down
+                self.direction = "down"
+                self.update_animation(self.down_move_frames)
+            elif dy < 0:  # Moving up
+                self.direction = "up"
+                self.update_animation(self.up_move_frames)
+            else:  
+                self.image = self.image_normal
+
+
+    def update_animation(self, frames):
+        """Cycle through the frames for movement animation."""
+        self.frame_index = (self.frame_index + 1) % len(frames)
+        self.image = frames[self.frame_index]  # Update image to the current frame
+        self.image = pygame.transform.scale(self.image, (TILE_SIZE, TILE_SIZE))  # Scale to tile size
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
-
 
 class SokobanGame:
     def __init__(self):
@@ -215,11 +254,9 @@ class SokobanGame:
         tile_images = {
             "#": pygame.image.load(os.path.join(ASSET_PATH, "wall.png")),
             " ": pygame.image.load(os.path.join(ASSET_PATH, "ground.png")),
-            "$": pygame.image.load(os.path.join(ASSET_PATH, "stone.png")),
-            # "@": pygame.image.load(os.path.join(ASSET_PATH, "player.png")),
             ".": pygame.image.load(os.path.join(ASSET_PATH, "switch_place.png")),
-            "*": pygame.image.load(os.path.join(ASSET_PATH, "stone_switch_place.png")),
-            #"+": pygame.image.load(os.path.join(ASSET_PATH, "ares_on_switch.png")),
+            "+": pygame.image.load(os.path.join(ASSET_PATH, "switch_place.png")),
+            "*": pygame.image.load(os.path.join(ASSET_PATH, "switch_place.png"))
         }
 
         for key, image in tile_images.items():
@@ -247,12 +284,15 @@ class SokobanGame:
                         self.walls.append(wall_position)
 
                     if inside_walls:
-                        if char == "@":
+                        if char in ('@', '+'):
                             self.player = Player(offset_x + (x * TILE_SIZE), offset_y + ((y-1) * TILE_SIZE))
-                        if char == "$":
-                            self.stones.append(Stone(offset_x + (x * TILE_SIZE), offset_y + ((y-1) * TILE_SIZE), stones_value[cnt_stone]))
-                            cnt_stone
-                        if char == '.':
+                        if char in ('$'):
+                            self.stones.append(Stone(offset_x + (x * TILE_SIZE), offset_y + ((y-1) * TILE_SIZE), stones_value[cnt_stone], False))
+                            cnt_stone += 1
+                        if char in ('*'):
+                            self.stones.append(Stone(offset_x + (x * TILE_SIZE), offset_y + ((y-1) * TILE_SIZE), stones_value[cnt_stone], True))
+                            cnt_stone += 1
+                        if char in ('.', '+', '*'):
                             self.switches.append((offset_x + (x * TILE_SIZE), offset_y + ((y-1) * TILE_SIZE)))
 
     def render_map(self):

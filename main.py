@@ -22,7 +22,6 @@ class Stone:
         self.y = y
         self.value = value
         self.image = pygame.image.load('asset/stone.png')
-        self.image = pygame.image.load('asset/stone.png')
         self.image = pygame.transform.scale(self.image, (TILE_SIZE, TILE_SIZE)) 
         self.rect = self.image.get_rect(topleft=(self.x, self.y))
 
@@ -88,6 +87,10 @@ class SokobanGame:
         self.current_score = pygame.image.load('asset/Score.png')
         self.current_level = pygame.image.load('asset/Level.png')
         self.current_algo = pygame.image.load('asset/Algo.png')
+        self.back_button = pygame.image.load('asset/back.png')
+        self.home_button = pygame.image.load('asset/home.png')
+        self.home_button_rect = self.home_button.get_rect(topleft=(1000, 25))
+        self.back_button_rect = self.back_button.get_rect(topleft=(24, 25))
         for i in range(1, 5):
             button_image = pygame.image.load(f'asset/algo{i}.png')
             self.algoBtn.append(button_image)
@@ -129,6 +132,8 @@ class SokobanGame:
         self.screen.blit(self.titleTableLevel, (229, 57))
         for i, button in enumerate(self.levelBtn):
             self.screen.blit(button, self.levelBtnRects[i].topleft)
+        self.screen.blit(self.back_button, (24, 25))
+        self.screen.blit(self.home_button, (1000, 25))
 
     def algo_selection_screen(self):
         self.screen.blit(self.background, (0, 0))  
@@ -136,6 +141,7 @@ class SokobanGame:
         self.screen.blit(self.table, (227, 200))  
         for i, button in enumerate(self.algoBtn):
             self.screen.blit(button, self.algoBtnRects[i].topleft)
+        self.screen.blit(self.home_button, (1000, 25))
 
     def load_level(self, level_file):
         with open(level_file, 'r') as f:
@@ -193,6 +199,7 @@ class SokobanGame:
 
     def play_game(self):
         custom_font = pygame.font.Font("font/IrishGrover-Regular.ttf", 36)  # Replace with the actual path and desired size
+        self.screen.blit(self.home_button, (1000, 25))
 
         # Render text for labels
         score_text = custom_font.render("100", True, (255, 255, 255)) 
@@ -206,8 +213,6 @@ class SokobanGame:
 
         algo_x = 372 + (self.current_algo.get_width() - algo_text.get_width()) // 2
         algo_y = 19 + (self.current_algo.get_height() - algo_text.get_height()) // 2
-
-
         self.screen.blit(self.current_score, (17, 19))
         self.screen.blit(self.current_level, (222, 19))
         self.screen.blit(self.current_algo, (372, 19))
@@ -230,17 +235,27 @@ class SokobanGame:
                         if self.button_start_rect.collidepoint(event.pos):
                             self.state = "algo_selection"
                     elif self.state == "algo_selection":
+                        print("HI")
                         for i, rect in enumerate(self.algoBtnRects):
                             if rect.collidepoint(event.pos):
                                 self.algoType = i
                                 self.state = "level_selection"
                                 break
+                        if (self.home_button_rect.collidepoint(event.pos)):
+                            self.state = "welcome"
                     elif self.state == "level_selection":
                         for i, rect in enumerate(self.levelBtnRects):
                             if rect.collidepoint(event.pos):
                                 self.load_level(f'levels/level{i + 1}.txt')
                                 self.state = "play_game"
                                 break
+                        if (self.back_button_rect.collidepoint(event.pos)):
+                            self.state = "algo_selection"
+                        if (self.home_button_rect.collidepoint(event.pos)):
+                            self.state = "welcome"
+                    elif self.state == "play_game":
+                        if (self.home_button_rect.collidepoint(event.pos)):
+                            self.state = "welcome"
                                            
         
             if self.state == "welcome":

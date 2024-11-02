@@ -74,7 +74,6 @@ class Stone:
             text_rect = value_text.get_rect(center=(self.rect.centerx - 5, self.rect.centery + 10))
 
         screen.blit(value_text, text_rect)
-
 class Player:
     def __init__(self, x, y):
         self.x = x
@@ -108,6 +107,7 @@ class Player:
         self.rect = self.image.get_rect(topleft=(self.x, self.y))
 
     def move(self, dx, dy, stones, walls, switches):
+        current_stone = 0
         # Calculate potential new position for the player
         new_x = self.x + dx
         new_y = self.y + dy
@@ -115,7 +115,7 @@ class Player:
 
         # Check if the player is trying to move into a wall
         if new_position in walls:
-            return  # Stop movement if blocked by a wall
+            return current_stone # Stop movement if blocked by a wall
 
         collided_with_stone = False
 
@@ -129,11 +129,12 @@ class Player:
 
                 # Check if the stone's new position is blocked by a wall or another stone
                 if stone_new_position in walls or any(s.rect.topleft == stone_new_position for s in stones if s != stone):
-                    return  # Stop movement if stone is blocked
+                    return current_stone  # Stop movement if stone is blocked
 
                 # Move the stone if not blocked
                 stone.move(dx, dy, walls, stones, switches)
                 collided_with_stone = True
+                current_stone = int(stone.value)
                 break
 
         # Update player position if not blocked by a wall or a non-movable stone
@@ -156,6 +157,8 @@ class Player:
                 self.update_animation(self.up_move_frames)
             else:  
                 self.image = self.image_normal
+
+        return current_stone
 
 
     def update_animation(self, frames):
@@ -277,6 +280,8 @@ class SokobanGame:
         self.stones = []
         self.switches = []
         self.player = None
+        self.step = 0
+        self.score = 0
         self.screen.blit(self.background, (0, 0))
         if self.level_file:
             max_width = max(len(row) for row in self.level_file[1:]) - 1  # Ignore \n
@@ -384,7 +389,7 @@ class SokobanGame:
             # Display win message with score
             win_font = pygame.font.Font("font/IrishGrover-Regular.ttf", 64)
             win_text = win_font.render("You Win!", True, (18, 55, 42))
-            score_display_text = win_font.render(f"Score: 100", True, (18, 55, 42))
+            score_display_text = win_font.render(f"Score: {self.score}", True, (18, 55, 42))
 
             # Center win text
             win_x = (self.screen.get_width() - win_text.get_width()) // 2
@@ -408,17 +413,33 @@ class SokobanGame:
                 elif event.type == pygame.KEYDOWN:
                     if self.state == "play_game" and not self.win:
                         if event.key == pygame.K_LEFT:
-                            self.player.move(-TILE_SIZE, 0, self.stones, self.walls, self.switches)
+                            value = self.player.move(-TILE_SIZE, 0, self.stones, self.walls, self.switches)
                             self.step += 1
+                            if value != 0:
+                                self.score += value + 1
+                            else:
+                                self.score += 1
                         elif event.key == pygame.K_RIGHT:
-                            self.player.move(TILE_SIZE, 0, self.stones, self.walls, self.switches)
+                            value = self.player.move(TILE_SIZE, 0, self.stones, self.walls, self.switches)
                             self.step += 1
+                            if value != 0:
+                                self.score += value + 1
+                            else:
+                                self.score += 1
                         elif event.key == pygame.K_UP:
-                            self.player.move(0, -TILE_SIZE, self.stones, self.walls, self.switches)
+                            value = self.player.move(0, -TILE_SIZE, self.stones, self.walls, self.switches)
                             self.step += 1
+                            if value != 0:
+                                self.score += value + 1
+                            else:
+                                self.score += 1
                         elif event.key == pygame.K_DOWN:
-                            self.player.move(0, TILE_SIZE, self.stones, self.walls, self.switches)
+                            value = self.player.move(0, TILE_SIZE, self.stones, self.walls, self.switches)
                             self.step += 1
+                            if value != 0:
+                                self.score += value + 1
+                            else:
+                                self.score += 1
 
                  # Check for mouse button events
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -439,6 +460,7 @@ class SokobanGame:
                             if rect.collidepoint(event.pos):
                                 self.load_level(f'levels/level{i + 1}.txt')
                                 self.state = "play_game"
+                                self.level = i + 1
                                 break
                         if (self.back_button_rect.collidepoint(event.pos)):
                             self.state = "algo_selection"

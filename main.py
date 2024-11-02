@@ -1,12 +1,17 @@
 import pygame
 import os
 
+import algorithmSimulate
+from algorithmSimulate import getKey
+import time
+
 pygame.init()
 
 # Constants
 SCREEN_WIDTH, SCREEN_HEIGHT = 1122, 727
 BUTTON_WIDTH, BUTTON_HEIGHT = 200, 50
 FONT_SIZE = 32
+INTERACTION_TIME = 1
 
 # Colors
 WHITE = (255, 255, 255)
@@ -175,6 +180,12 @@ class SokobanGame:
         pygame.init()  # Initialize Pygame
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption("Sokoban Game")
+        
+        self.lastInteractionTime = time.time()
+        self.isAlgoSimulated = False
+        self.solution = ""
+        self.solutionIndex = 0
+        
         self.algoType = None
         self.state = "welcome"
         self.level_file = None
@@ -459,17 +470,43 @@ class SokobanGame:
                         for i, rect in enumerate(self.levelBtnRects):
                             if rect.collidepoint(event.pos):
                                 self.load_level(f'levels/level{i + 1}.txt')
+                                
+                                self.isAlgoSimulated, self.solution = algorithmSimulate.process(f'levels/level{i + 1}.txt', self.algoType, i + 1)
+                                self.solutionIndex = 0
+                                
                                 self.state = "play_game"
                                 self.level = i + 1
                                 break
                         if (self.back_button_rect.collidepoint(event.pos)):
                             self.state = "algo_selection"
+                            self.isAlgoSimulated = False
+                            
                         if (self.home_button_rect.collidepoint(event.pos)):
                             self.state = "welcome"
+                            self.isAlgoSimulated = False
+                            
                     elif self.state == "play_game":
                         if (self.home_button_rect.collidepoint(event.pos)):
                             self.state = "welcome"
-                                           
+                            self.isAlgoSimulated = False
+                       
+            if (self.state == "play_game" and self.isAlgoSimulated == True):
+                if (self.solutionIndex >= len(self.solution)):
+                    self.isAlgoSimulated = False
+                    self.solution = ""
+                    self.solutionIndex = 0
+                
+                else:
+                    currTime = time.time()
+                    if (currTime - self.lastInteractionTime >= INTERACTION_TIME):
+                        key = getKey(self.solution[self.solutionIndex])
+                        self.solutionIndex += 1
+                        
+                        simulated_event = pygame.event.Event(pygame.KEYDOWN, key=key)
+                        pygame.event.post(simulated_event)
+                        
+                        self.lastInteractionTime = currTime
+                    
         
             if self.state == "welcome":
                 self.welcome_screen()

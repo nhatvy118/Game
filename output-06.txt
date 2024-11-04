@@ -1,0 +1,2 @@
+A*
+Steps: 0, Weight: 0, Node: 1, Time (ms): 0.00, Memory (MB): 65.73

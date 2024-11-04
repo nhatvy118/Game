@@ -1,0 +1,3 @@
+BFS
+Steps: 56, Weight: 267, Node: 31933, Time (ms): 19706.70, Memory (MB): 95.29
+luuRRUUddllddrrUUddrruLdllluurrUrDlllddrrUUruLdddrUUllUU

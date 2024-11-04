@@ -11,7 +11,7 @@ pygame.init()
 SCREEN_WIDTH, SCREEN_HEIGHT = 1122, 727
 BUTTON_WIDTH, BUTTON_HEIGHT = 200, 50
 FONT_SIZE = 32
-INTERACTION_TIME = 1
+INTERACTION_TIME = 0.5
 
 # Colors
 WHITE = (255, 255, 255)
@@ -458,7 +458,6 @@ class SokobanGame:
                         if self.button_start_rect.collidepoint(event.pos):
                             self.state = "algo_selection"
                     elif self.state == "algo_selection":
-                        print("HI")
                         for i, rect in enumerate(self.algoBtnRects):
                             if rect.collidepoint(event.pos):
                                 self.algoType = i

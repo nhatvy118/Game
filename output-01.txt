@@ -1,3 +1,3 @@
-UCS
-Steps: 7, Weight: 205, Node: 10384, Time (ms): 9048.88, Memory (MB): 81.39
-uurDrdL
+A*
+Steps: 7, Weight: 205, Node: 98, Time (ms): 47.30, Memory (MB): 66.83
+rruLulD

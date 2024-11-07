@@ -69,14 +69,25 @@ class Node:
                     if (Pair(r, c) in self.goals): 
                         continue
                         
-                    blocked = 0
+                    blockedLeft = False
+                    blockedRight = False
+                    blockedUp = False
+                    blockedDown = False
+                    
                     for dir in directions:
                         r1 = r + dir["value"].x
                         c1 = c + dir["value"].y
                         
-                        if (self.board[r1][c1].type == '#'): blocked += 1
+                        if (self.board[r1][c1].type == '#'):
+                            if (dir["name"] == 'U'): blockedUp = True
+                            elif (dir["name"] == 'D'):blockedDown = True
+                            elif (dir["name"] == 'L'): blockedLeft = True
+                            else: blockedRight = True
                     
-                    if (blocked >= 2): return True
+                    if (blockedLeft and blockedUp): return True
+                    elif (blockedLeft and blockedDown): return True
+                    elif (blockedRight and blockedUp): return True
+                    elif (blockedRight and blockedDown): return True
         
         return False
                     

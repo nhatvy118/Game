@@ -1,3 +1,3 @@
-A*
-Steps: 95, Weight: 376, Node: 16101, Time (ms): 10485.42, Memory (MB): 76.41
-rrUUUUruulldRurDldddddlluuRlddrruUUURRRurDDullluulldRurDldRRRurDllllddlldRdrUUUUruulldRurDldRRR
+BFS
+Steps: 7, Weight: 17, Node: 1373, Time (ms): 1225.32, Memory (MB): 98.74
+DuUdRlL

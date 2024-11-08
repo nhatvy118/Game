@@ -1,3 +1,6 @@
 A*
 Steps: 8, Weight: 14, Node: 317, Time (ms): 177.15, Memory (MB): 88.28
 DldRRRRR
+A*
+Steps: 8, Weight: 14, Node: 317, Time (ms): 197.32, Memory (MB): 86.16
+DldRRRRR

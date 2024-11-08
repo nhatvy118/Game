@@ -1,0 +1,6 @@
+A*
+Steps: 25, Weight: 40, Node: 7153, Time (ms): 8446.88, Memory (MB): 100.77
+ldRurDDrdLuuuuLdlUUluRRRR
+A*
+Steps: 25, Weight: 40, Node: 7153, Time (ms): 8616.68, Memory (MB): 113.33
+ldRurDDrdLuuuuLdlUUluRRRR

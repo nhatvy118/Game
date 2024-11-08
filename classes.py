@@ -64,6 +64,30 @@ class Node:
     def isDeadlocked(self):
         for r in range(len(self.board)):
             for c in range(len(self.board[r])):
+                if self.board[r][c].type == '$' and self.board[r][c+1].type == '$':
+                    if (self.board[r-1][c].type == '#' and self.board[r-1][c+1].type == '#'):
+                        return True
+                if self.board[r][c].type == '$' and self.board[r][c-1].type == '$':
+                    if (self.board[r-1][c].type == '#' and self.board[r-1][c-1].type == '#'):
+                        return True
+                if self.board[r][c].type == '$' and self.board[r][c+1].type == '$':
+                    if (self.board[r+1][c].type == '#' and self.board[r+1][c+1].type == '#'):
+                        return True
+                if self.board[r][c].type == '$' and self.board[r][c-1].type == '$':
+                    if (self.board[r+1][c].type == '#' and self.board[r+1][c-1].type == '#'):
+                        return True
+                if self.board[r][c].type == '$' and self.board[r+1][c].type == '$':
+                    if (self.board[r][c-1].type == '#' and self.board[r+1][c-1].type == '#'):
+                        return True
+                if self.board[r][c].type == '$' and self.board[r-1][c].type == '$':
+                    if (self.board[r-1][c-1].type == '#' and self.board[r][c-1].type == '#'):
+                        return True    
+                if self.board[r][c].type == '$' and self.board[r+1][c].type == '$':
+                    if (self.board[r][c+1].type == '#' and self.board[r+1][c+1].type == '#'):
+                        return True
+                if self.board[r][c].type == '$' and self.board[r-1][c].type == '$':
+                    if (self.board[r-1][c+1].type == '#' and self.board[r][c+1].type == '#'):
+                        return True           
                 if self.board[r][c].type == '$':
                     
                     if (Pair(r, c) in self.goals): 

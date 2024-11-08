@@ -2,6 +2,8 @@ import copy
 import heapq
 from classes import Node, directions, Pair
 import time, psutil, os
+import numpy as np
+from scipy.optimize import linear_sum_assignment
 
 def manhattanDistance(node):
     totalCost = 0
@@ -17,14 +19,17 @@ def manhattanDistance(node):
             if (node.board[r][c].type == '$') and (Pair(r, c) not in node.goals):
                 boxPositions.append(Pair(r, c))
     
+    distances = []
     for box in boxPositions:
-        distance = []
-        
         for target in targets:
-            distance.append((abs(box.x - target.x) + abs(box.y - target.y)) * node.board[box.x][box.y].weight)
-        
-        totalCost += min(distance)
+            distance = (abs(box.x - target.x) + abs(box.y - target.y)) * node.board[box.x][box.y].weight
+            distances.append(distance)
     
+    cost_matrix = np.array(distances).reshape(len(targets), len(boxPositions))
+    
+    row_ind, col_ind = linear_sum_assignment(cost_matrix)
+    
+    totalCost = cost_matrix[row_ind, col_ind].sum()
     return totalCost
 
 def AStarAlgorithm(originalBoard, originalPlayer, originalGoals):

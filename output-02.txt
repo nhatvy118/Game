@@ -1,3 +1,9 @@
+DFS
+Steps: 252, Weight: 1466, Node: 17041, Time (ms): 18822.17, Memory (MB): 110.41
+rrrrrrrrruulLLLLLLrrrrrrrddllllllllluRluRlddrrrrrrrrruullllllLrrrrrrrddlllllllUrrrrrrruullllllllDldRRluRllddrrrrrrrrruulllllLLrrrrrrrddllllllUluRlulDldRRluurrrrrrrrddlllllLLLrrrrrrrruulllllDllllDrrrRllluurrrrrrrrddlllLLLLrrrrrrruulllllllldldRRdrUluRRRR
 A*
-Steps: 7, Weight: 207, Node: 99, Time (ms): 73.83, Memory (MB): 68.59
+Steps: 7, Weight: 205, Node: 98, Time (ms): 71.61, Memory (MB): 101.56
 rruLulD
+DFS
+Steps: 252, Weight: 1466, Node: 17041, Time (ms): 18974.66, Memory (MB): 110.54
+rrrrrrrrruulLLLLLLrrrrrrrddllllllllluRluRlddrrrrrrrrruullllllLrrrrrrrddlllllllUrrrrrrruullllllllDldRRluRllddrrrrrrrrruulllllLLrrrrrrrddllllllUluRlulDldRRluurrrrrrrrddlllllLLLrrrrrrrruulllllDllllDrrrRllluurrrrrrrrddlllLLLLrrrrrrruulllllllldldRRdrUluRRRR

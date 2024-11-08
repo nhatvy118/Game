@@ -1,3 +1,6 @@
 A*
 Steps: 18, Weight: 26, Node: 499, Time (ms): 448.25, Memory (MB): 122.96
 uurrrrRRurDDrdLLLL
+A*
+Steps: 18, Weight: 26, Node: 499, Time (ms): 320.39, Memory (MB): 90.49
+uurrrrRRurDDrdLLLL

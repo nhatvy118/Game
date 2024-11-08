@@ -10,3 +10,6 @@ DldRRRRR
 UCS
 Steps: 8, Weight: 14, Node: 712, Time (ms): 443.33, Memory (MB): 89.38
 DldRRRRR
+A*
+Steps: 8, Weight: 14, Node: 317, Time (ms): 145.18, Memory (MB): 90.31
+DldRRRRR

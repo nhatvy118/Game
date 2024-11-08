@@ -1,0 +1,12 @@
+DFS
+Steps: 1, Weight: 1, Node: 110, Time (ms): 72.76, Memory (MB): 88.79
+u
+DFS
+Steps: 1, Weight: 1, Node: 110, Time (ms): 73.76, Memory (MB): 88.71
+u
+A*
+Steps: 16, Weight: 26, Node: 141, Time (ms): 82.93, Memory (MB): 88.89
+lLDuulldRurDrrur
+A*
+Steps: 16, Weight: 26, Node: 141, Time (ms): 77.95, Memory (MB): 111.69
+lLDuulldRurDrrur

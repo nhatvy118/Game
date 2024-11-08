@@ -78,4 +78,6 @@ def process(inputPath: str, algoType: int, level: int):
         algo = "UCS"
     
     writeFile(f"output-{levelStr}.txt", algo, path, cost, time, memoryUsed, cntNode)
+    
+    if (path == "-1"): return False, path
     return True, path.upper()

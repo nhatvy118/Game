@@ -4,6 +4,8 @@ import os
 import algorithmSimulate
 from algorithmSimulate import getKey
 import time
+import threading
+import math
 
 pygame.init()
 
@@ -175,6 +177,7 @@ class Player:
     def draw(self, screen):
         screen.blit(self.image, self.rect)
 
+
 class SokobanGame:
     def __init__(self):
         pygame.init()  # Initialize Pygame
@@ -194,6 +197,9 @@ class SokobanGame:
         self.step = 0
         self.player = None  
         self.stones = [] 
+        self.level = 1
+        self.algoFinished = False
+        self.processing_thread = None
         self.title = pygame.image.load('asset/Aries.png')
         self.background = pygame.image.load('asset/background.png')
         self.background = pygame.transform.scale(self.background, (SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -415,8 +421,42 @@ class SokobanGame:
         self.screen.blit(self.home_button, (1000, 25))
         pygame.display.flip()
 
+    def draw_loading_screen(self, frame):
+        font = pygame.font.Font(None, 36)
+        text = font.render('...Loading...', True, (255, 255, 255))
+        text_rect = text.get_rect(center=(self.screen.get_width() // 2, self.screen.get_height() // 2))
+
+        # Define the size and position of the rectangle
+        rect_width, rect_height = 300, 200
+        rect_x = (self.screen.get_width() - rect_width) // 2
+        rect_y = (self.screen.get_height() - rect_height) // 2
+
+        # Draw the rectangle
+        pygame.draw.rect(self.screen, (50, 50, 50), (rect_x, rect_y, rect_width, rect_height)) 
+        self.screen.blit(self.back_button, (24, 25))
+
+        # Animate the text by making it blink
+        if (frame // 30) % 2 == 0:  # Change the divisor to control the blink speed
+            self.screen.blit(text, text_rect)
+
+        pygame.display.flip()
+
+    def choose_level(self, level):
+        self.load_level(f'levels/level{level}.txt')
+        self.level = level
+        self.state = "loading"  
+        self.algoFinished = False  
+        self.processing_thread = threading.Thread(target=self.run_algorithm, args=(level,))
+        self.processing_thread.start()
+
+    def run_algorithm(self, level):
+        self.isAlgoSimulated, self.solution = algorithmSimulate.process(f'levels/level{level}.txt', self.algoType, self.level)
+        self.solutionIndex = 0
+        self.algoFinished = True 
+
     def run(self):
         running = True
+        frame = 0
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -468,13 +508,8 @@ class SokobanGame:
                     elif self.state == "level_selection":
                         for i, rect in enumerate(self.levelBtnRects):
                             if rect.collidepoint(event.pos):
-                                self.load_level(f'levels/level{i + 1}.txt')
-                                
-                                self.isAlgoSimulated, self.solution = algorithmSimulate.process(f'levels/level{i + 1}.txt', self.algoType, i + 1)
-                                self.solutionIndex = 0
-                                
-                                self.state = "play_game"
-                                self.level = i + 1
+                                frame = 0
+                                self.choose_level(i + 1)
                                 break
                         if (self.back_button_rect.collidepoint(event.pos)):
                             self.state = "algo_selection"
@@ -488,6 +523,17 @@ class SokobanGame:
                         if (self.home_button_rect.collidepoint(event.pos)):
                             self.state = "welcome"
                             self.isAlgoSimulated = False
+                    elif self.state == "loading":
+                        if self.back_button_rect.collidepoint(event.pos):
+                            self.state = "level_selection"
+                            self.isAlgoSimulated = False
+
+            if self.state == "loading":
+                self.draw_loading_screen(frame)
+                pygame.display.update()
+                if self.algoFinished:
+                    self.state = "play_game"
+                    self.processing_thread = None
                        
             if (self.state == "play_game" and self.isAlgoSimulated == True):
                 if (self.solutionIndex >= len(self.solution)):
@@ -517,6 +563,7 @@ class SokobanGame:
                 self.play_game()
             
             pygame.display.flip()
+            frame += 1
 
 def main():
     # Game instance

@@ -30,6 +30,8 @@ def bfs(originalBoard, originalPlayer, originalGoals):
         if (node.isGoalState()): break
         if (node.isDeadlocked()): continue
         
+        currentTime = time.time()
+        if (currentTime - startTime > 120): return "-1", -1, -1, -1, -1
         
         # print(node.ID)
         

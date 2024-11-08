@@ -20,6 +20,9 @@ def dfs(originalBoard, originalPlayer, originalGoals):
     # print(board)
     
     while stack:
+        currentTime = time.time()
+        
+        if (currentTime - startTime > 120): return "-1", -1, -1, -1, -1
         node = stack.pop()
         
         if (node.isGoalState()): break

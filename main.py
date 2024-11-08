@@ -442,7 +442,7 @@ class SokobanGame:
         pygame.display.flip()
 
     def choose_level(self, level):
-        self.load_level(f'levels/level{level}.txt')
+        self.load_level(f'levels/input-{level:02}.txt')
         self.level = level
         self.state = "loading"  
         self.algoFinished = False  
@@ -450,7 +450,7 @@ class SokobanGame:
         self.processing_thread.start()
 
     def run_algorithm(self, level):
-        self.isAlgoSimulated, self.solution = algorithmSimulate.process(f'levels/level{level}.txt', self.algoType, self.level)
+        self.isAlgoSimulated, self.solution = algorithmSimulate.process(f'levels/input-{level:02}.txt', self.algoType, self.level)
         self.solutionIndex = 0
         self.algoFinished = True 
 

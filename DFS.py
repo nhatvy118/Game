@@ -13,28 +13,36 @@ def dfs(originalBoard, originalPlayer, originalGoals):
     startNode = Node(board, player, goals, "", 0)
     stack = deque()
 
-    stack.append(startNode)
-    visited.add(startNode.ID)
+    if (startNode.isGoalState() == False):
+        stack.append(startNode)
+        visited.add(startNode.ID)
     
     cntNode = 1
     # print(board)
     
+    ok = False
     while stack:
         currentTime = time.time()
         
         if (currentTime - startTime > 120): return "-1", -1, -1, -1, -1
         node = stack.pop()
         
-        if (node.isGoalState()): break
         if (node.isDeadlocked()): continue
         
         for dir in directions:
             if (node.canMove(dir)):
                 newNode = node.move(dir)
                 if (newNode.ID not in visited):
+                    if (newNode.isGoalState() == True):
+                        node = newNode
+                        ok = True
+                        break
+                    
                     stack.append(newNode)
                     cntNode += 1
                     visited.add(newNode.ID)
+        
+        if (ok): break
     
     path = node.path
     # print("\nResult path: ", path)

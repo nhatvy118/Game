@@ -13,8 +13,10 @@ def bfs(originalBoard, originalPlayer, originalGoals):
     q = queue.Queue()
 
     startTime = time.time()
-    q.put(startNode)  
-    visited.add(startNode.ID)  
+    if (startNode.isGoalState() == False):
+        q.put(startNode)  
+        visited.add(startNode.ID) 
+         
     # print(board)
     
     # for r in range(len(board)):
@@ -24,10 +26,10 @@ def bfs(originalBoard, originalPlayer, originalGoals):
     
     cntNode = 1
     
+    ok = False
     while not q.empty():
         node = q.get()
         
-        if (node.isGoalState()): break
         if (node.isDeadlocked()): continue
         
         currentTime = time.time()
@@ -44,9 +46,16 @@ def bfs(originalBoard, originalPlayer, originalGoals):
             if (node.canMove(dir)):
                 newNode = node.move(dir)
                 if (newNode.ID not in visited):
+                    if (newNode.isGoalState() == True):
+                        node = newNode
+                        ok = True
+                        break
+                
                     q.put(newNode)
                     cntNode += 1
                     visited.add(newNode.ID)
+        
+        if (ok): break
     
     path = node.path
     # print("\nResult path: ", path)

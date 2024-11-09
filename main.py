@@ -529,6 +529,12 @@ class SokobanGame:
                             self.state = "welcome"
                             self.isAlgoSimulated = False  
                         elif self.button_reset_rect.collidepoint(event.pos):
+                            self.win = False
+                            
+                            self.load_level(f'levels/input-{self.level:02}.txt')
+                            
+                            self.isAlgoSimulated = True
+                            self.solutionIndex = 0
                             ### code reset cho nay
                     elif self.state == "loading":
                         if self.back_button_rect.collidepoint(event.pos):
@@ -545,8 +551,6 @@ class SokobanGame:
             if (self.state == "play_game" and self.isAlgoSimulated == True):
                 if (self.solutionIndex >= len(self.solution)):
                     self.isAlgoSimulated = False
-                    self.solution = ""
-                    self.solutionIndex = 0
                 
                 else:
                     currTime = time.time()

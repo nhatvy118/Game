@@ -26,7 +26,7 @@ def uniformCostSearch(originalBoard, originalPlayer, originalGoals):
     
     while pq:
         currentTime = time.time()
-        if (currentTime - startTime > 120): return "-1", -1, -1, -1, -1
+        if (currentTime - startTime > 300): return "-1", -1, -1, -1, -1
         
         heapq.heapify(pq)
         node = heapq.heappop(pq)

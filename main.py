@@ -20,10 +20,8 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
 GRAY = (100, 100, 100)
-TILE_SIZE = 60
+TILE_SIZE = 40
 tile_images = {}
-
-import pygame
 
 class Stone:
     def __init__(self, x, y, value, on_switch):

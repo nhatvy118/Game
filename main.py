@@ -207,8 +207,11 @@ class SokobanGame:
         self.table = pygame.image.load('asset/table.png')
         self.titleTableAlgo = pygame.image.load('asset/title_table_algo.png')
         self.titleTableLevel = pygame.image.load('asset/level_title.png')
+        self.button_reset = pygame.image.load('asset/reset_button.png')
         self.button_start_rect = self.button_start.get_rect()
         self.button_start_rect.topleft = (458, 461)
+        self.button_reset_rect = self.button_reset.get_rect()
+        self.button_reset_rect.topleft = (1000, 150)
         self.algoBtn = []
         self.algoBtnRects = []
         self.win = False
@@ -417,8 +420,10 @@ class SokobanGame:
             self.screen.blit(win_text, (win_x, win_y))
             self.screen.blit(score_display_text, (score_x, score_y))
             
+            
 
         self.screen.blit(self.home_button, (1000, 25))
+        self.screen.blit(self.button_reset, self.button_reset_rect.topleft)
         pygame.display.flip()
 
     def draw_loading_screen(self, frame):
@@ -522,7 +527,9 @@ class SokobanGame:
                     elif self.state == "play_game":
                         if (self.home_button_rect.collidepoint(event.pos)):
                             self.state = "welcome"
-                            self.isAlgoSimulated = False
+                            self.isAlgoSimulated = False  
+                        elif self.button_reset_rect.collidepoint(event.pos):
+                            ### code reset cho nay
                     elif self.state == "loading":
                         if self.back_button_rect.collidepoint(event.pos):
                             self.state = "level_selection"

@@ -206,10 +206,13 @@ class SokobanGame:
         self.titleTableAlgo = pygame.image.load('asset/title_table_algo.png')
         self.titleTableLevel = pygame.image.load('asset/level_title.png')
         self.button_reset = pygame.image.load('asset/reset_button.png')
+        self.button_algo = pygame.image.load('asset/algo_button.png')
         self.button_start_rect = self.button_start.get_rect()
         self.button_start_rect.topleft = (458, 461)
         self.button_reset_rect = self.button_reset.get_rect()
         self.button_reset_rect.topleft = (1000, 150)
+        self.button_algo_rect = self.button_reset.get_rect()
+        self.button_algo_rect.topleft = (1000, 286)
         self.algoBtn = []
         self.algoBtnRects = []
         self.win = False
@@ -220,6 +223,7 @@ class SokobanGame:
         self.home_button = pygame.image.load('asset/home.png')
         self.home_button_rect = self.home_button.get_rect(topleft=(1000, 25))
         self.back_button_rect = self.back_button.get_rect(topleft=(24, 25))
+        self.back_button_algo = self.back_button.get_rect(topleft=(1000, 286))
         for i in range(1, 5):
             button_image = pygame.image.load(f'asset/algo{i}.png')
             self.algoBtn.append(button_image)
@@ -422,6 +426,7 @@ class SokobanGame:
 
         self.screen.blit(self.home_button, (1000, 25))
         self.screen.blit(self.button_reset, self.button_reset_rect.topleft)
+        self.screen.blit(self.button_algo, self.button_algo_rect.topleft)
         pygame.display.flip()
 
     def draw_loading_screen(self, frame):
@@ -525,7 +530,9 @@ class SokobanGame:
                     elif self.state == "play_game":
                         if (self.home_button_rect.collidepoint(event.pos)):
                             self.state = "welcome"
-                            self.isAlgoSimulated = False  
+                            self.isAlgoSimulated = False 
+                        elif self.button_algo_rect.collidepoint(event.pos):
+                            self.state = "algo_selection"
                         elif self.button_reset_rect.collidepoint(event.pos):
                             self.win = False
                             
@@ -533,7 +540,6 @@ class SokobanGame:
                             
                             self.isAlgoSimulated = True
                             self.solutionIndex = 0
-                            ### code reset cho nay
                     elif self.state == "loading":
                         if self.back_button_rect.collidepoint(event.pos):
                             self.state = "level_selection"

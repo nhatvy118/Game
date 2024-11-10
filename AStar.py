@@ -37,8 +37,8 @@ def AStarAlgorithm(originalBoard, originalPlayer, originalGoals):
     goals = copy.deepcopy(originalGoals)
     player = originalPlayer
     
-    visited = set()
-    
+    visited = {}
+
     startTime = time.time()
     
     startNode = Node(board, player, goals, "", 0)
@@ -54,12 +54,7 @@ def AStarAlgorithm(originalBoard, originalPlayer, originalGoals):
         heapq.heapify(pq)
         node = heapq.heappop(pq)
         
-        if (node.isGoalState()): break
-        
-        
-        if (node.ID in visited): continue
-        visited.add(node.ID)
-        
+        if (node.isGoalState()): break  
         if (node.isDeadlocked()): continue
         
         for dir in directions:
@@ -67,8 +62,9 @@ def AStarAlgorithm(originalBoard, originalPlayer, originalGoals):
                 newNode = node.move(dir)
                 newNode.heuristicCost = manhattanDistance(newNode)
                 
-                if (newNode.ID not in visited):
+                if (newNode.ID not in visited or newNode.cost + newNode.heuristicCost < visited[newNode.ID]):
                     heapq.heappush(pq, newNode)
+                    visited[newNode.ID] = newNode.cost
                     cntNode += 1
     
     path = node.path

@@ -9,7 +9,7 @@ Sokoban is a classic puzzle video game where the player pushes crates or stones 
 The player can move horizontally or vertically onto empty squares but cannot move through walls or stones. To move a box, the player must walk up to it and push it into the adjacent empty square. stones cannot be pulled, nor can they be pushed into squares with walls or other stones. The puzzle is solved when all stones are successfully placed at their corresponding goal locations.
 
 <div align="center">
-<img src="asset/map.jpg" align="center"/>
+<img src="asset/t3.png" align="center"/>
 </div>
 
 ## Team members
@@ -84,5 +84,5 @@ While the program is solving the puzzle (which may take approximately 1 to 3 min
 Once the puzzle is solved, the game will view the completed result.
 
 <div align="center">
-<img src="asset/map.jpg" align="center"/>
+<img src="asset/t3_win.png" align="center"/>
 </div>

@@ -8,13 +8,9 @@ Sokoban is a classic puzzle video game where the player pushes crates or stones 
 
 The player can move horizontally or vertically onto empty squares but cannot move through walls or stones. To move a box, the player must walk up to it and push it into the adjacent empty square. stones cannot be pulled, nor can they be pushed into squares with walls or other stones. The puzzle is solved when all stones are successfully placed at their corresponding goal locations.
 
-<div align="center">
-<img src="asset/t3.png" align="center"/>
-</div>
-
 ## Team members
 
-**Lê Công Quốc Hân - Đào Bá Thành - Phạm Ngọc Phương Uyên - Huỳnh Phan Nhật Vy**
+Lê Công Quốc Hân - Đào Bá Thành - Phạm Ngọc Phương Uyên - Huỳnh Phan Nhật Vy
 
 ## System Requirements:
 -   Python 3.x
@@ -23,8 +19,8 @@ The player can move horizontally or vertically onto empty squares but cannot mov
 
 ## Features
 
--  Interactive GUI built with **Pygame**
--  **AI Pathfinding Algorithms:**
+-  Interactive GUI built with Pygame
+-  AI Pathfinding Algorithms:
    -  Depth First Search (DFS)
    -  Breadth First Search (BFS)
    -  Uniform Cost Search (UCS)
@@ -34,7 +30,7 @@ The player can move horizontally or vertically onto empty squares but cannot mov
 
 ## Installation
 
-**Install Dependencies**
+Install Dependencies
 
 ```sh
 $ pip install -r requirements.txt
@@ -44,7 +40,7 @@ $ pip install -r requirements.txt
 
 #### Step 1: Launching the game
 
-**Run the command below**
+Run the command below
 
 ```sh
 $ python main.py
@@ -52,37 +48,19 @@ $ python main.py
 
 Upon starting, you’ll see a main menu where you can choose:
 
--  Select an _AI algorithm_ for solving the level.
-
-<div align="center">
-<img src="asset/algorithms_choices.jpg" align="center"/>
-</div>
-
--  **DFS** explores as far as possible along each branch before backtracking.
--  **BFS** ensures the shortest solution in terms of moves but can be slower.
--  **UCS** optimizes the total cost of moves.
--  **A\*** uses heuristics to find an efficient path.
+-  DFS explores as far as possible along each branch before backtracking.
+-  BFS ensures the shortest solution in terms of moves but can be slower.
+-  UCS optimizes the total cost of moves.
+-  A* uses heuristics to find an efficient path.
 
 #### Step 2: Selecting a level  
 
 _Choose a level between 1 and 12._
 
-<div align="center">
-<img src="asset/level_choices.jpg" align="center"/>
-</div>
-
 #### Step 3: Start the game
 
-Press **Enter** to begin solving the level with the chosen algorithm. Observe the AI as it calculates the path to solve the puzzle.
+Press Enter to begin solving the level with the chosen algorithm. Observe the AI as it calculates the path to solve the puzzle.
 
-<div align="center">
-<img src="asset/loading.jpg" align="center"/>
-</div>
-
-While the program is solving the puzzle (which may take approximately 1 to 3 minutes), you can cancel the process at any time by pressing the **Return** on the top left of the game screen.
+While the program is solving the puzzle (which may take approximately 1 to 3 minutes), you can cancel the process at any time by pressing the Return on the top left of the game screen.
 
 Once the puzzle is solved, the game will view the completed result.
-
-<div align="center">
-<img src="asset/t3_win.png" align="center"/>
-</div>

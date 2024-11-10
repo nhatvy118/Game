@@ -1,0 +1,8 @@
+A*
+Timeout
+DFS
+Timeout
+BFS
+Timeout
+UCS
+Timeout

@@ -216,6 +216,7 @@ class SokobanGame:
         self.algoBtn = []
         self.algoBtnRects = []
         self.win = False
+        self.istimeout = False
         self.current_score = pygame.image.load('asset/Score.png')
         self.current_level = pygame.image.load('asset/Level.png')
         self.current_algo = pygame.image.load('asset/Level.png')
@@ -354,13 +355,35 @@ class SokobanGame:
                         inside_walls = True  
 
                     if inside_walls:
-                        if char not in ("#") and x < len(row) - 1:
+                        if char not in ("#") and x < len(row) - 1 and y != 1 and y != len(self.level_file) - 1:
                             self.screen.blit(tile_images[" "], (offset_x + (x * TILE_SIZE), offset_y + ((y-1) * TILE_SIZE)))
                         if char in tile_images and char not in ('@', '$'):
+                            if (char == ' ' and (y == 1 or y == len(self.level_file)-1)): continue
                             self.screen.blit(tile_images[char], (offset_x + (x * TILE_SIZE), offset_y + ((y-1) * TILE_SIZE)))
 
     def play_game(self):
         self.screen.blit(self.background, (0, 0)) 
+        if self.istimeout: 
+            # Blurring effect
+            blur_surface = pygame.transform.smoothscale(self.screen, (self.screen.get_width() // 2, self.screen.get_height() // 2))
+            blur_surface = pygame.transform.smoothscale(blur_surface, (self.screen.get_width(), self.screen.get_height()))
+            self.screen.blit(blur_surface, (0, 0))
+            
+
+            # Display win message with score
+            win_font = pygame.font.Font("font/IrishGrover-Regular.ttf", 64)
+            win_text = win_font.render("Time Out!", True, (18, 55, 42))
+
+            # Center win text
+            win_x = (self.screen.get_width() - win_text.get_width()) // 2
+            win_y = (self.screen.get_height() - win_text.get_height()) // 2 - 50
+
+            self.screen.blit(win_text, (win_x, win_y))
+            self.screen.blit(self.home_button, (1000, 25))
+            self.screen.blit(self.button_reset, self.button_reset_rect.topleft)
+            self.screen.blit(self.button_algo, self.button_algo_rect.topleft)
+            pygame.display.flip()
+            return
         self.render_map() 
         
         # Custom font setup
@@ -462,6 +485,11 @@ class SokobanGame:
         self.solutionIndex = 0
         self.algoFinished = True 
 
+    def time_out(self):
+        self.isAlgoSimulated = False
+        self.algoFinished = True
+        self.state = "level_selection"
+
     def run(self):
         running = True
         frame = 0
@@ -522,7 +550,6 @@ class SokobanGame:
                         if (self.back_button_rect.collidepoint(event.pos)):
                             self.state = "algo_selection"
                             self.isAlgoSimulated = False
-                            
                         if (self.home_button_rect.collidepoint(event.pos)):
                             self.state = "welcome"
                             self.isAlgoSimulated = False
@@ -535,9 +562,7 @@ class SokobanGame:
                             self.state = "algo_selection"
                         elif self.button_reset_rect.collidepoint(event.pos):
                             self.win = False
-                            
                             self.load_level(f'levels/input-{self.level:02}.txt')
-                            
                             self.isAlgoSimulated = True
                             self.solutionIndex = 0
                     elif self.state == "loading":
@@ -549,6 +574,8 @@ class SokobanGame:
                 self.draw_loading_screen(frame)
                 pygame.display.update()
                 if self.algoFinished:
+                    if not self.isAlgoSimulated:
+                        self.istimeout = True
                     self.state = "play_game"
                     self.processing_thread = None
                        
@@ -571,6 +598,7 @@ class SokobanGame:
             if self.state == "welcome":
                 self.welcome_screen()
             elif self.state == "algo_selection":
+                self.istimeout = False
                 self.algo_selection_screen()
             elif self.state == "level_selection":
                 self.level_selection_screen()

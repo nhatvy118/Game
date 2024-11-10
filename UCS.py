@@ -26,21 +26,15 @@ def uniformCostSearch(originalBoard, originalPlayer, originalGoals):
     
     while pq:
         currentTime = time.time()
-        if (currentTime - startTime > 300): return "-1", -1, -1, -1, -1
+        if (currentTime - startTime > 180): return "-1", -1, -1, -1, -1
         
         heapq.heapify(pq)
         node = heapq.heappop(pq)
         
         if (node.isGoalState()): break
         if (node.isDeadlocked()): continue
-        
-        # print(node.ID)
-        
-        # for r in range(len(node.board)):
-        #     for c in range(len(node.board[r])):
-        #         print(board[r][c].type, end='')
-        #     print()
-        
+        if (node.ID in visited and visited[node.ID] != node.cost): continue
+
         for dir in directions:
             if (node.canMove(dir)):
                 newNode = node.move(dir)
@@ -49,6 +43,7 @@ def uniformCostSearch(originalBoard, originalPlayer, originalGoals):
                     visited[newNode.ID] = newNode.cost
                     cntNode += 1
     
+    if (node.isGoalState() == False): return "-1", -1, -1, -1, -1
     path = node.path
     # print("\nResult path: ", path)
     

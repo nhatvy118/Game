@@ -24,7 +24,7 @@ def dfs(originalBoard, originalPlayer, originalGoals):
     while stack:
         currentTime = time.time()
         
-        if (currentTime - startTime > 300): return "-1", -1, -1, -1, -1
+        if (currentTime - startTime > 130): return "-1", -1, -1, -1, -1
         node = stack.pop()
         
         if (node.isDeadlocked()): continue
@@ -43,7 +43,8 @@ def dfs(originalBoard, originalPlayer, originalGoals):
                     visited.add(newNode.ID)
         
         if (ok): break
-    
+
+    if (node.isGoalState() == False): return "-1", -1, -1, -1, -1
     path = node.path
     # print("\nResult path: ", path)
     

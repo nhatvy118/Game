@@ -33,7 +33,7 @@ def bfs(originalBoard, originalPlayer, originalGoals):
         if (node.isDeadlocked()): continue
         
         currentTime = time.time()
-        if (currentTime - startTime > 300): return "-1", -1, -1, -1, -1
+        if (currentTime - startTime > 180): return "-1", -1, -1, -1, -1
         
         # print(node.ID)
         
@@ -56,7 +56,8 @@ def bfs(originalBoard, originalPlayer, originalGoals):
                     visited.add(newNode.ID)
         
         if (ok): break
-    
+        
+    if (node.isGoalState() == False): return "-1", -1, -1, -1, -1
     path = node.path
     # print("\nResult path: ", path)
     
